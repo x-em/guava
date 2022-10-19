@@ -52,7 +52,6 @@ import junit.framework.TestCase;
  *
  * @author Brian Stoler
  */
-
 public class AbstractFutureTest extends TestCase {
   public void testSuccess() throws ExecutionException, InterruptedException {
     final Object value = new Object();
@@ -292,6 +291,7 @@ public class AbstractFutureTest extends TestCase {
    * derived from observing how much time actually passed for various operations.
    */
   @SuppressWarnings({"DeprecatedThreadMethods", "ThreadPriorityCheck"})
+  @AndroidIncompatible // Thread.suspend
   public void testToString_delayedTimeout() throws Exception {
     TimedWaiterThread thread =
         new TimedWaiterThread(new AbstractFuture<Object>() {}, 2, TimeUnit.SECONDS);
@@ -559,7 +559,7 @@ public class AbstractFutureTest extends TestCase {
     allTasks.add(setFutureCancelRunnable);
     for (int k = 0; k < 50; k++) {
       // For each listener we add a task that submits it to the executor directly for the blocking
-      // get usecase and another task that adds it as a listener to the future to exercise both
+      // get use case and another task that adds it as a listener to the future to exercise both
       // racing addListener calls and addListener calls completing after the future completes.
       final Runnable listener =
           k % 2 == 0 ? collectResultsRunnable : collectResultsTimedGetRunnable;
@@ -683,7 +683,7 @@ public class AbstractFutureTest extends TestCase {
     allTasks.add(setFutureCompleteSuccessfullyRunnable);
     for (int k = 0; k < size; k++) {
       // For each listener we add a task that submits it to the executor directly for the blocking
-      // get usecase and another task that adds it as a listener to the future to exercise both
+      // get use case and another task that adds it as a listener to the future to exercise both
       // racing addListener calls and addListener calls completing after the future completes.
       final Runnable listener =
           k % 2 == 0 ? collectResultsRunnable : collectResultsTimedGetRunnable;

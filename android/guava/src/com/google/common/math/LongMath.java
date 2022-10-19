@@ -425,7 +425,7 @@ public final class LongMath {
         // subtracting two nonnegative longs can't overflow
         // cmpRemToHalfDivisor has the same sign as compare(abs(rem), abs(q) / 2).
         if (cmpRemToHalfDivisor == 0) { // exactly on the half mark
-          increment = (mode == HALF_UP | (mode == HALF_EVEN & (div & 1) != 0));
+          increment = (mode == HALF_UP || (mode == HALF_EVEN && (div & 1) != 0));
         } else {
           increment = cmpRemToHalfDivisor > 0; // closer to the UP value
         }
@@ -543,7 +543,6 @@ public final class LongMath {
    *
    * @throws ArithmeticException if {@code a + b} overflows in signed {@code long} arithmetic
    */
-  @GwtIncompatible // TODO
   public static long checkedAdd(long a, long b) {
     long result = a + b;
     checkNoOverflow((a ^ b) < 0 | (a ^ result) >= 0, "checkedAdd", a, b);
@@ -979,7 +978,7 @@ public final class LongMath {
   }
 
   /*
-   * This bitmask is used as an optimization for cheaply testing for divisiblity by 2, 3, or 5.
+   * This bitmask is used as an optimization for cheaply testing for divisibility by 2, 3, or 5.
    * Each bit is set to 1 for all remainders that indicate divisibility by 2, 3, or 5, so
    * 1, 7, 11, 13, 17, 19, 23, 29 are set to 0. 30 and up don't matter because they won't be hit.
    */

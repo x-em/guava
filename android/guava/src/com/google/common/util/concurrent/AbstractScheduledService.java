@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.util.concurrent.Futures.immediateCancelledFuture;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
+import static com.google.common.util.concurrent.Platform.restoreInterruptIfIsInterruptedException;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.GwtIncompatible;
@@ -202,9 +203,11 @@ public abstract class AbstractScheduledService implements Service {
           }
           AbstractScheduledService.this.runOneIteration();
         } catch (Throwable t) {
+          restoreInterruptIfIsInterruptedException(t);
           try {
             shutDown();
           } catch (Exception ignored) {
+            restoreInterruptIfIsInterruptedException(ignored);
             logger.log(
                 Level.WARNING,
                 "Error while attempting to shut down the service after failure.",
@@ -242,6 +245,7 @@ public abstract class AbstractScheduledService implements Service {
                 runningTask = scheduler().schedule(delegate, executorService, task);
                 notifyStarted();
               } catch (Throwable t) {
+                restoreInterruptIfIsInterruptedException(t);
                 notifyFailed(t);
                 if (runningTask != null) {
                   // prevent the task from running if possible
@@ -280,6 +284,7 @@ public abstract class AbstractScheduledService implements Service {
                 }
                 notifyStopped();
               } catch (Throwable t) {
+                restoreInterruptIfIsInterruptedException(t);
                 notifyFailed(t);
               }
             }
@@ -347,7 +352,7 @@ public abstract class AbstractScheduledService implements Service {
     }
     final ScheduledExecutorService executor =
         Executors.newSingleThreadScheduledExecutor(new ThreadFactoryImpl());
-    // Add a listener to shutdown the executor after the service is stopped. This ensures that the
+    // Add a listener to shut down the executor after the service is stopped. This ensures that the
     // JVM shutdown will not be prevented from exiting after this service has stopped or failed.
     // Technically this listener is added after start() was called so it is a little gross, but it
     // is called within doStart() so we know that the service cannot terminate or fail concurrently
@@ -553,6 +558,7 @@ public abstract class AbstractScheduledService implements Service {
         try {
           schedule = CustomScheduler.this.getNextSchedule();
         } catch (Throwable t) {
+          restoreInterruptIfIsInterruptedException(t);
           service.notifyFailed(t);
           return new FutureAsCancellable(immediateCancelledFuture());
         }
@@ -565,7 +571,7 @@ public abstract class AbstractScheduledService implements Service {
         lock.lock();
         try {
           toReturn = initializeOrUpdateCancellationDelegate(schedule);
-        } catch (Throwable e) {
+        } catch (RuntimeException | Error e) {
           // If an exception is thrown by the subclass then we need to make sure that the service
           // notices and transitions to the FAILED state. We do it by calling notifyFailed directly
           // because the service does not monitor the state of the future so if the exception is not

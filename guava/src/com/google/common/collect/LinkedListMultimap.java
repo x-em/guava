@@ -90,8 +90,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * with a call to {@link Multimaps#synchronizedListMultimap}.
  *
  * <p>See the Guava User Guide article on <a href=
- * "https://github.com/google/guava/wiki/NewCollectionTypesExplained#multimap"> {@code
- * Multimap}</a>.
+ * "https://github.com/google/guava/wiki/NewCollectionTypesExplained#multimap">{@code Multimap}</a>.
  *
  * @author Mike Bostock
  * @since 2.0
@@ -214,7 +213,7 @@ public class LinkedListMultimap<K extends @Nullable Object, V extends @Nullable 
   /**
    * Adds a new node for the specified key-value pair before the specified {@code nextSibling}
    * element, or at the end of the list if {@code nextSibling} is null. Note: if {@code nextSibling}
-   * is specified, it MUST be for an node for the same {@code key}!
+   * is specified, it MUST be for a node for the same {@code key}!
    */
   @CanIgnoreReturnValue
   private Node<K, V> addNode(

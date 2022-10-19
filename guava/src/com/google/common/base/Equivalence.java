@@ -21,6 +21,7 @@ import com.google.errorprone.annotations.ForOverride;
 import java.io.Serializable;
 import java.util.function.BiPredicate;
 import javax.annotation.CheckForNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -165,7 +166,8 @@ public abstract class Equivalence<T> implements BiPredicate<@Nullable T, @Nullab
    * @since 10.0
    */
   public final <S extends @Nullable T> Wrapper<S> wrap(@ParametricNullness S reference) {
-    return new Wrapper<S>(this, reference);
+    Wrapper<S> w = new Wrapper<>(this, reference);
+    return w;
   }
 
   /**
@@ -189,10 +191,19 @@ public abstract class Equivalence<T> implements BiPredicate<@Nullable T, @Nullab
    * @since 10.0
    */
   public static final class Wrapper<T extends @Nullable Object> implements Serializable {
-    private final Equivalence<? super T> equivalence;
+    /*
+     * Equivalence's type argument is always non-nullable: Equivalence<Number>, never
+     * Equivalence<@Nullable Number>. That can still produce wrappers of various types --
+     * Wrapper<Number>, Wrapper<Integer>, Wrapper<@Nullable Integer>, etc. If we used just
+     * Equivalence<? super T> below, no type could satisfy both that bound and T's own
+     * bound. With this type, they have some overlap: in our example, Equivalence<Number>
+     * and Equivalence<Object>.
+     */
+    private final Equivalence<? super @NonNull T> equivalence;
+
     @ParametricNullness private final T reference;
 
-    private Wrapper(Equivalence<? super T> equivalence, @ParametricNullness T reference) {
+    private Wrapper(Equivalence<? super @NonNull T> equivalence, @ParametricNullness T reference) {
       this.equivalence = checkNotNull(equivalence);
       this.reference = reference;
     }

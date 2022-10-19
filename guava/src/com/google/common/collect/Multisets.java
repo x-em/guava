@@ -51,7 +51,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Provides static utility methods for creating and working with {@link Multiset} instances.
  *
  * <p>See the Guava User Guide article on <a href=
- * "https://github.com/google/guava/wiki/CollectionUtilitiesExplained#multisets"> {@code
+ * "https://github.com/google/guava/wiki/CollectionUtilitiesExplained#multisets">{@code
  * Multisets}</a>.
  *
  * @author Kevin Bourrillion
@@ -1159,8 +1159,8 @@ public final class Multisets {
   }
 
   /**
-   * Returns a copy of {@code multiset} as an {@link ImmutableMultiset} whose iteration order is
-   * highest count first, with ties broken by the iteration order of the original multiset.
+   * Returns a copy of {@code multiset} as an {@link ImmutableMultiset} whose iteration order puts
+   * the highest count first, with ties broken by the iteration order of the original multiset.
    *
    * @since 11.0
    */

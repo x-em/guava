@@ -29,6 +29,8 @@ import com.google.common.primitives.Ints;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.j2objc.annotations.RetainedWith;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.math.RoundingMode;
 import java.util.Arrays;
@@ -423,6 +425,10 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
     return new SerializedForm(toArray());
   }
 
+  private void readObject(ObjectInputStream stream) throws InvalidObjectException {
+    throw new InvalidObjectException("Use SerializedForm");
+  }
+
   /**
    * Returns a new builder. The generated builder is equivalent to the builder created by the {@link
    * Builder} constructor.
@@ -549,6 +555,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
       return this;
     }
 
+    @CanIgnoreReturnValue
     Builder<E> combine(Builder<E> other) {
       requireNonNull(impl);
       requireNonNull(other.impl);
@@ -857,7 +864,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
 
     /**
      * We attempt to detect deliberate hash flooding attempts. If one is detected, we fall back to a
-     * wrapper around j.u.HashSet, which has built in flooding protection. MAX_RUN_MULTIPLIER was
+     * wrapper around j.u.HashSet, which has built-in flooding protection. MAX_RUN_MULTIPLIER was
      * determined experimentally to match our desired probability of false positives.
      */
     // NB: yes, this is surprisingly high, but that's what the experiments said was necessary

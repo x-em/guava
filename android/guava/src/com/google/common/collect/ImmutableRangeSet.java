@@ -30,6 +30,8 @@ import com.google.common.primitives.Ints;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.DoNotCall;
 import com.google.errorprone.annotations.concurrent.LazyInit;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
@@ -504,7 +506,7 @@ public final class ImmutableRangeSet<C extends Comparable> extends AbstractRange
    * such a set can be performed efficiently, but others (such as {@link Set#hashCode} or {@link
    * Collections#frequency}) can cause major performance problems.
    *
-   * <p>The returned set's {@link Object#toString} method returns a short-hand form of the set's
+   * <p>The returned set's {@link Object#toString} method returns a shorthand form of the set's
    * contents, such as {@code "[1..100]}"}.
    *
    * @throws IllegalArgumentException if neither this range nor the domain has a lower bound, or if
@@ -680,6 +682,10 @@ public final class ImmutableRangeSet<C extends Comparable> extends AbstractRange
     Object writeReplace() {
       return new AsSetSerializedForm<C>(ranges, domain);
     }
+
+    private void readObject(ObjectInputStream stream) throws InvalidObjectException {
+      throw new InvalidObjectException("Use SerializedForm");
+    }
   }
 
   private static class AsSetSerializedForm<C extends Comparable> implements Serializable {
@@ -828,5 +834,9 @@ public final class ImmutableRangeSet<C extends Comparable> extends AbstractRange
 
   Object writeReplace() {
     return new SerializedForm<C>(ranges);
+  }
+
+  private void readObject(ObjectInputStream stream) throws InvalidObjectException {
+    throw new InvalidObjectException("Use SerializedForm");
   }
 }

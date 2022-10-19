@@ -36,7 +36,6 @@ import static java.util.logging.Level.FINER;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Level.WARNING;
 
-import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -191,7 +190,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @since 30.0
  */
 // TODO(dpb): Consider reusing one CloseableList for the entire pipeline, modulo combinations.
-@Beta // @Beta for one release.
 @DoNotMock("Use ClosingFuture.from(Futures.immediate*Future)")
 @ElementTypesAreNonnullByDefault
 // TODO(dpb): GWT compatibility.
@@ -414,7 +412,7 @@ public final class ClosingFuture<V extends @Nullable Object> {
   /**
    * Starts a {@link ClosingFuture} pipeline with a {@link ListenableFuture}.
    *
-   * <p>If {@code future} succeeds, its value will be closed (using {@code closingExecutor)} when
+   * <p>If {@code future} succeeds, its value will be closed (using {@code closingExecutor)}) when
    * the pipeline is done, even if the pipeline is canceled or fails.
    *
    * <p>Cancelling the pipeline will not cancel {@code future}, so that the pipeline can access its

@@ -17,6 +17,7 @@ package com.google.common.util.concurrent;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.util.concurrent.Platform.restoreInterruptIfIsInterruptedException;
 import static com.google.common.util.concurrent.Service.State.FAILED;
 import static com.google.common.util.concurrent.Service.State.NEW;
 import static com.google.common.util.concurrent.Service.State.RUNNING;
@@ -249,6 +250,7 @@ public abstract class AbstractService implements Service {
         enqueueStartingEvent();
         doStart();
       } catch (Throwable startupFailure) {
+        restoreInterruptIfIsInterruptedException(startupFailure);
         notifyFailed(startupFailure);
       } finally {
         monitor.leave();
@@ -288,6 +290,7 @@ public abstract class AbstractService implements Service {
             throw new AssertionError("isStoppable is incorrectly implemented, saw: " + previous);
         }
       } catch (Throwable shutdownFailure) {
+        restoreInterruptIfIsInterruptedException(shutdownFailure);
         notifyFailed(shutdownFailure);
       } finally {
         monitor.leave();
@@ -316,7 +319,7 @@ public abstract class AbstractService implements Service {
         monitor.leave();
       }
     } else {
-      // It is possible due to races the we are currently in the expected state even though we
+      // It is possible due to races that we are currently in the expected state even though we
       // timed out. e.g. if we weren't event able to grab the lock within the timeout we would never
       // even check the guard. I don't think we care too much about this use case but it could lead
       // to a confusing error message.
@@ -343,7 +346,7 @@ public abstract class AbstractService implements Service {
         monitor.leave();
       }
     } else {
-      // It is possible due to races the we are currently in the expected state even though we
+      // It is possible due to races that we are currently in the expected state even though we
       // timed out. e.g. if we weren't event able to grab the lock within the timeout we would never
       // even check the guard. I don't think we care too much about this use case but it could lead
       // to a confusing error message.

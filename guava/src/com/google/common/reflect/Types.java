@@ -160,7 +160,7 @@ final class Types {
   }
 
   /**
-   * Returns human readable string representation of {@code type}.
+   * Returns a human-readable string representation of {@code type}.
    *
    * <p>The format is subject to change.
    */
@@ -372,7 +372,7 @@ final class Types {
           builder.put(method.getName(), method);
         }
       }
-      typeVariableMethods = builder.build();
+      typeVariableMethods = builder.buildKeepingLast();
     }
 
     private final TypeVariableImpl<?> typeVariableImpl;
