@@ -55,7 +55,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * A test utility that verifies that your methods and constructors throw {@link
  * NullPointerException} or {@link UnsupportedOperationException} whenever null is passed to a
  * parameter whose declaration or type isn't annotated with an annotation with the simple name
- * {@code Nullable}, {@code CheckForNull}, {@link NullableType}, or {@link NullableDecl}.
+ * {@code Nullable}, {@code CheckForNull}, {@code NullableType}, or {@code NullableDecl}.
  *
  * <p>The tested methods and constructors are invoked -- each time with one parameter being null and
  * the rest not null -- and the test fails if no expected exception is thrown. {@code
@@ -482,13 +482,13 @@ public final class NullPointerTester {
           "CheckForNull", "Nullable", "NullableDecl", "NullableType", "ParametricNullness");
 
   static boolean isNullable(Invokable<?, ?> invokable) {
-    return isNullable(invokable.getAnnotatedReturnType().getAnnotations())
-        || isNullable(invokable.getAnnotations());
+    return containsNullable(invokable.getAnnotatedReturnType().getAnnotations())
+        || containsNullable(invokable.getAnnotations());
   }
 
   static boolean isNullable(Parameter param) {
-    return isNullable(param.getAnnotatedType().getAnnotations())
-        || isNullable(param.getAnnotations())
+    return containsNullable(param.getAnnotatedType().getAnnotations())
+        || containsNullable(param.getAnnotations())
         || isNullableTypeVariable(param.getAnnotatedType().getType());
   }
 
@@ -501,14 +501,14 @@ public final class NullPointerTester {
     for (AnnotatedType bound : bounds) {
       // Until Java 15, the isNullableTypeVariable case here won't help:
       // https://bugs.openjdk.java.net/browse/JDK-8202469
-      if (isNullable(bound.getAnnotations()) || isNullableTypeVariable(bound.getType())) {
+      if (containsNullable(bound.getAnnotations()) || isNullableTypeVariable(bound.getType())) {
         return true;
       }
     }
     return false;
   }
 
-  private static boolean isNullable(Annotation[] annotations) {
+  private static boolean containsNullable(Annotation[] annotations) {
     for (Annotation annotation : annotations) {
       if (NULLABLE_ANNOTATION_SIMPLE_NAMES.contains(annotation.annotationType().getSimpleName())) {
         return true;

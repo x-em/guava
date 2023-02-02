@@ -30,7 +30,10 @@ import com.google.common.util.concurrent.MoreExecutors;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Delayed;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -88,9 +91,9 @@ public final class TestingExecutors {
    * invokeAll/invokeAny} throwing RejectedExecutionException, although a subset of the tasks may
    * already have been executed.
    *
-   * @since 15.0
+   * @since NEXT (taking the place of a method with a different return type from 15.0)
    */
-  public static SameThreadScheduledExecutorService sameThreadScheduledExecutor() {
+  public static ListeningScheduledExecutorService sameThreadScheduledExecutor() {
     return new SameThreadScheduledExecutorService();
   }
 

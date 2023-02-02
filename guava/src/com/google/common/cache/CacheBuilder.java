@@ -31,14 +31,15 @@ import com.google.common.cache.AbstractCache.StatsCounter;
 import com.google.common.cache.LocalCache.Strength;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.j2objc.annotations.J2ObjCIncompatible;
+import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 import java.util.ConcurrentModificationException;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.annotation.CheckForNull;
 
 /**
  * A builder of {@link LoadingCache} and {@link Cache} instances.
@@ -130,13 +131,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *         });
  * }</pre>
  *
- * <p>The returned cache is implemented as a hash table with similar performance characteristics to
- * {@link ConcurrentHashMap}. It implements all optional operations of the {@link LoadingCache} and
- * {@link Cache} interfaces. The {@code asMap} view (and its collection views) have <i>weakly
- * consistent iterators</i>. This means that they are safe for concurrent use, but if other threads
- * modify the cache after the iterator is created, it is undefined which of these changes, if any,
- * are reflected in that iterator. These iterators never throw {@link
- * ConcurrentModificationException}.
+ * <p>The returned cache implements all optional operations of the {@link LoadingCache} and {@link
+ * Cache} interfaces. The {@code asMap} view (and its collection views) have <i>weakly consistent
+ * iterators</i>. This means that they are safe for concurrent use, but if other threads modify the
+ * cache after the iterator is created, it is undefined which of these changes, if any, are
+ * reflected in that iterator. These iterators never throw {@link ConcurrentModificationException}.
  *
  * <p><b>Note:</b> by default, the returned cache uses equality comparisons (the {@link
  * Object#equals equals} method) to determine equality for keys or values. However, if {@link
@@ -144,34 +143,33 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * Likewise, if {@link #weakValues} or {@link #softValues} was specified, the cache uses identity
  * comparisons for values.
  *
- * <p>Entries are automatically evicted from the cache when any of {@linkplain #maximumSize(long)
- * maximumSize}, {@linkplain #maximumWeight(long) maximumWeight}, {@linkplain #expireAfterWrite
- * expireAfterWrite}, {@linkplain #expireAfterAccess expireAfterAccess}, {@linkplain #weakKeys
- * weakKeys}, {@linkplain #weakValues weakValues}, or {@linkplain #softValues softValues} are
- * requested.
+ * <p>Entries are automatically evicted from the cache when any of {@link #maximumSize(long)
+ * maximumSize}, {@link #maximumWeight(long) maximumWeight}, {@link #expireAfterWrite
+ * expireAfterWrite}, {@link #expireAfterAccess expireAfterAccess}, {@link #weakKeys weakKeys},
+ * {@link #weakValues weakValues}, or {@link #softValues softValues} are requested.
  *
- * <p>If {@linkplain #maximumSize(long) maximumSize} or {@linkplain #maximumWeight(long)
- * maximumWeight} is requested entries may be evicted on each cache modification.
+ * <p>If {@link #maximumSize(long) maximumSize} or {@link #maximumWeight(long) maximumWeight} is
+ * requested entries may be evicted on each cache modification.
  *
- * <p>If {@linkplain #expireAfterWrite expireAfterWrite} or {@linkplain #expireAfterAccess
- * expireAfterAccess} is requested entries may be evicted on each cache modification, on occasional
- * cache accesses, or on calls to {@link Cache#cleanUp}. Expired entries may be counted by {@link
- * Cache#size}, but will never be visible to read or write operations.
+ * <p>If {@link #expireAfterWrite expireAfterWrite} or {@link #expireAfterAccess expireAfterAccess}
+ * is requested entries may be evicted on each cache modification, on occasional cache accesses, or
+ * on calls to {@link Cache#cleanUp}. Expired entries may be counted by {@link Cache#size}, but will
+ * never be visible to read or write operations.
  *
- * <p>If {@linkplain #weakKeys weakKeys}, {@linkplain #weakValues weakValues}, or {@linkplain
- * #softValues softValues} are requested, it is possible for a key or value present in the cache to
- * be reclaimed by the garbage collector. Entries with reclaimed keys or values may be removed from
- * the cache on each cache modification, on occasional cache accesses, or on calls to {@link
- * Cache#cleanUp}; such entries may be counted in {@link Cache#size}, but will never be visible to
- * read or write operations.
+ * <p>If {@link #weakKeys weakKeys}, {@link #weakValues weakValues}, or {@link #softValues
+ * softValues} are requested, it is possible for a key or value present in the cache to be reclaimed
+ * by the garbage collector. Entries with reclaimed keys or values may be removed from the cache on
+ * each cache modification, on occasional cache accesses, or on calls to {@link Cache#cleanUp}; such
+ * entries may be counted in {@link Cache#size}, but will never be visible to read or write
+ * operations.
  *
  * <p>Certain cache configurations will result in the accrual of periodic maintenance tasks which
  * will be performed during write operations, or during occasional read operations in the absence of
  * writes. The {@link Cache#cleanUp} method of the returned cache will also perform maintenance, but
- * calling it should not be necessary with a high throughput cache. Only caches built with
- * {@linkplain #removalListener removalListener}, {@linkplain #expireAfterWrite expireAfterWrite},
- * {@linkplain #expireAfterAccess expireAfterAccess}, {@linkplain #weakKeys weakKeys}, {@linkplain
- * #weakValues weakValues}, or {@linkplain #softValues softValues} perform periodic maintenance.
+ * calling it should not be necessary with a high throughput cache. Only caches built with {@link
+ * #removalListener removalListener}, {@link #expireAfterWrite expireAfterWrite}, {@link
+ * #expireAfterAccess expireAfterAccess}, {@link #weakKeys weakKeys}, {@link #weakValues
+ * weakValues}, or {@link #softValues softValues} perform periodic maintenance.
  *
  * <p>The caches produced by {@code CacheBuilder} are serializable, and the deserialized caches
  * retain all the configuration properties of the original cache. Note that the serialized form does
@@ -275,10 +273,10 @@ public final class CacheBuilder<K, V> {
   int concurrencyLevel = UNSET_INT;
   long maximumSize = UNSET_INT;
   long maximumWeight = UNSET_INT;
-  @Nullable Weigher<? super K, ? super V> weigher;
+  @CheckForNull Weigher<? super K, ? super V> weigher;
 
-  @Nullable Strength keyStrength;
-  @Nullable Strength valueStrength;
+  @CheckForNull Strength keyStrength;
+  @CheckForNull Strength valueStrength;
 
   @SuppressWarnings("GoodTime") // should be a java.time.Duration
   long expireAfterWriteNanos = UNSET_INT;
@@ -289,11 +287,11 @@ public final class CacheBuilder<K, V> {
   @SuppressWarnings("GoodTime") // should be a java.time.Duration
   long refreshNanos = UNSET_INT;
 
-  @Nullable Equivalence<Object> keyEquivalence;
-  @Nullable Equivalence<Object> valueEquivalence;
+  @CheckForNull Equivalence<Object> keyEquivalence;
+  @CheckForNull Equivalence<Object> valueEquivalence;
 
-  @Nullable RemovalListener<? super K, ? super V> removalListener;
-  @Nullable Ticker ticker;
+  @CheckForNull RemovalListener<? super K, ? super V> removalListener;
+  @CheckForNull Ticker ticker;
 
   Supplier<? extends StatsCounter> statsCounterSupplier = NULL_STATS_COUNTER;
 

@@ -55,13 +55,14 @@ final class NullsFirstOrdering<T extends @Nullable Object> extends Ordering<@Nul
 
   @SuppressWarnings("unchecked") // still need the right way to explain this
   @Override
-  public <S extends T> Ordering<@Nullable S> nullsFirst() {
+  public <S extends @Nullable T> Ordering<@Nullable S> nullsFirst() {
     return (Ordering<@Nullable S>) this;
   }
 
   @Override
-  public <S extends T> Ordering<@Nullable S> nullsLast() {
-    return ordering.<S>nullsLast();
+  @SuppressWarnings("nullness") // probably a bug in our checker?
+  public <S extends @Nullable T> Ordering<@Nullable S> nullsLast() {
+    return ordering.nullsLast();
   }
 
   @Override
